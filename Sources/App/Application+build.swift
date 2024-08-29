@@ -10,6 +10,7 @@ public protocol AppArguments {
     var hostname: String { get }
     var port: Int { get }
     var logLevel: Logger.Level? { get }
+    var playersLimit: Int { get }
 }
 
 public func buildApplication(_ arguments: some AppArguments) async throws
@@ -25,20 +26,19 @@ public func buildApplication(_ arguments: some AppArguments) async throws
         return logger
     }()
     let router = Router()
-    // Add logging
     router.add(middleware: LogRequestsMiddleware(.info))
-    // Add health endpoint
     router.get("/health") { _, _ -> HTTPResponse.Status in
         return .ok
     }
 
     let apiGroup = router.group("api")
 
-    let state = GameSession.State(playersLimit: 1000, players: [])
+    let state = GameSession.State(playersLimit: arguments.playersLimit, players: [])
     let game = GameSession(state: state)
 
     let api = API(game: game)
     apiGroup.post("join", use: api.join)
+    apiGroup.post("turn", use: api.turn)
 
     let app = Application(
         router: router,
@@ -50,78 +50,3 @@ public func buildApplication(_ arguments: some AppArguments) async throws
     )
     return app
 }
-
-actor GameSession {
-    var state: State
-
-    init(state: State) {
-        self.state = state
-    }
-}
-
-extension GameSession {
-    struct State {
-        let playersLimit: Int
-        var players: [Player]
-        var nextTeam: Team = .crosses
-    }
-}
-
-extension GameSession {
-    func canJoin() -> Bool {
-        state.players.count < state.playersLimit
-    }
-
-    struct WaitForFreeSpotError: Error {
-    }
-
-    func join() throws -> Player {
-        guard canJoin() else {
-            throw WaitForFreeSpotError()
-        }
-        let player = Player(id: UUID(), team: state.nextTeam)
-        state.nextTeam.toggle()
-        return player
-    }
-}
-
-struct Player {
-    let id: UUID
-    let team: Team
-}
-
-enum Team: Int {
-    case noughts
-    case crosses
-}
-
-extension Team {
-    mutating func toggle() {
-        switch self {
-        case .crosses: self = .noughts
-        case .noughts: self = .crosses
-        }
-    }
-}
-
-struct API {
-    let game: GameSession
-}
-
-extension API {
-    struct JoinResult: ResponseEncodable {
-        let uid: String
-        let team: Int
-    }
-
-    @Sendable
-    func join(
-        request: Request,
-        context: some RequestContext
-    ) async throws -> JoinResult {
-        let player = try await game.join()
-        let result = JoinResult(uid: player.id.uuidString, team: player.team.rawValue)
-        return result
-    }
-}
-

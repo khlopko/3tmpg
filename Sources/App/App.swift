@@ -13,6 +13,9 @@ struct App: AsyncParsableCommand, AppArguments {
     @Option(name: .shortAndLong)
     var logLevel: Logger.Level?
 
+    @Option(name: .long)
+    var playersLimit: Int = 1000
+
     func run() async throws {
         let app = try await buildApplication(self)
         try await app.runService()

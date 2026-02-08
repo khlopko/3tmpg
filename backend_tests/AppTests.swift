@@ -4,7 +4,7 @@ import HummingbirdTesting
 import Logging
 import Testing
 
-@testable import App
+@testable import backend
 
 @Suite
 struct AppTests {

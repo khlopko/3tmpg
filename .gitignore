@@ -7,3 +7,7 @@
 xcuserdata/
 /.vscode/*
 !/.vscode/hummingbird.code-snippets
+
+# Frontend
+frontend/node_modules/
+frontend/bun.lock

@@ -1,0 +1,12 @@
+{
+  "name": "3tmpg-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "bun run serve.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/bun": "^1.1.0"
+  }
+}

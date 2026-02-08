@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "bun run serve.ts"
+    "serve": "bun run serve.ts",
+    "build": "bun build serve.ts --outdir ./dist"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

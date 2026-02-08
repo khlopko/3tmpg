@@ -11,3 +11,4 @@ xcuserdata/
 # Frontend
 frontend/node_modules/
 frontend/bun.lock
+frontend/dist/
